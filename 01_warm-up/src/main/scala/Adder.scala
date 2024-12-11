@@ -24,12 +24,19 @@ class HalfAdder extends Module{
     /* 
      * TODO: Define IO ports of a half adder as presented in the lecture
      */
+      val A = Input(UInt(1.W))
+      val B = Input(UInt(1.W))
+      val S = Output(UInt(1.W))
+      val C = Output(UInt(1.W))
     })
 
   /* 
    * TODO: Describe output behaviour based on the input values
    */
-
+  var signal = io.S //pointer to io.S
+  signal :=  io.A ^ io.B //assign value to io.S
+  signal = io.C//pointer to io.C
+  signal := io.A & io.B//assign value to io.C
 }
 
 /** 
@@ -49,19 +56,30 @@ class FullAdder extends Module{
     /* 
      * TODO: Define IO ports of a half adder as presented in the lecture
      */
+      val A = Input(UInt(1.W))
+      val B = Input(UInt(1.W))
+      val Ci = Input(UInt(1.W))
+      val S = Output(UInt(1.W))
+      val C = Output(UInt(1.W))
     })
 
-
   /* 
-   * TODO: Instanciate the two half adders you want to use based on your HalfAdder class
+   * TODO: Describe output behaviour based on the input values
    */
+  val half1 = Module(new HalfAdder)
+  val half2 = Module(new HalfAdder)
+  half1.io.A := io.A
+  half1.io.B := io.B
+  half2.io.A := io.Ci
+  half2.io.B := half1.io.S
+
+  var signal = io.S //pointer to io.S
+  signal := half2.io.S //assign value to io.S
+  signal = io.C//pointer to io.C
+  signal := half2.io.C | half1.io.C//assign value to io.C
+  }
 
 
-  /* 
-   * TODO: Describe output behaviour based on the input values and the internal signals
-   */
-
-}
 
 /** 
   * 4-bit Adder class 
@@ -77,16 +95,38 @@ class FourBitAdder extends Module{
 
   val io = IO(new Bundle {
     /* 
-     * TODO: Define IO ports of a 4-bit ripple-carry-adder as presented in the lecture
+     * TODO: Define IO ports of a half adder as presented in the lecture
      */
+      val A = Input(UInt(4.W))
+      val B = Input(UInt(4.W))
+      val S = Output(UInt(4.W))
+      val C = Output(UInt(1.W))
     })
 
   /* 
-   * TODO: Instanciate the full adders and one half adderbased on the previously defined classes
+   * TODO: Describe output behaviour based on the input values
    */
+  val half = Module(new HalfAdder)
+  val sum1 = Module(new FullAdder)
+  val sum2 = Module(new FullAdder)
+  val sum3 = Module(new FullAdder)
+
+  half.io.A := io.A(0)
+  half.io.B := io.B(0)
+  sum1.io.A := io.A(1)
+  sum1.io.B := io.B(1)
+  sum1.io.Ci := half.io.C
+  sum2.io.A := io.A(2)
+  sum2.io.B := io.B(2)
+  sum2.io.Ci := sum1.io.C
+  sum3.io.A := io.A(3)
+  sum3.io.B := io.B(3)
+  sum3.io.Ci := sum2.io.C
+
+  var signal = io.S //pointer to io.S
+  signal := Cat(sum3.io.S, sum2.io.S, sum1.io.S, half.io.S)//assign value to io.S
+  signal = io.C//pointer to io.C
+  signal := sum3.io.C//assign value to io.C
+  }
 
 
-  /* 
-   * TODO: Describe output behaviour based on the input values and the internal 
-   */
-}

@@ -32,7 +32,17 @@ class FourBitAdderTester extends AnyFlatSpec with ChiselScalatestTester {
   "4-bit Adder" should "work" in {
     test(new FourBitAdder).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
 
-        
+      for (A <- 0 to 15) {
+        for (B <- 0 to 15) {
+          val expectedSum = A + B //32bit
+          val expectedCarry = if (expectedSum >= 16) 1.U else 0.U
+
+          dut.io.A.poke(A.U)
+          dut.io.B.poke(B.U)
+          dut.io.S.expect((expectedSum & 0xF).U) //taking 4bit only with the &
+          dut.io.C.expect(expectedCarry)
+        }
+      }        
       /*
        * TODO: Insert your test cases
        */  
